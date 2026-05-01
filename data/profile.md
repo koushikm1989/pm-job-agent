@@ -14,9 +14,9 @@
 5. Director of Product / Head of Product (stretch)
 
 ## Domain Strengths
-- **Primary**: B2B SaaS, especially HealthTech / Life Sciences / Clinical software
-- **Secondary**: ERP transformation, cloud migration, enterprise platforms
-- **Industries to prioritize**: HealthTech, BioTech, Clinical Trials, Life Sciences SaaS, Enterprise B2B SaaS
+- **Primary**: any Enterprise B2B SaaS
+- **Secondary**: B2C, ERP transformation, cloud migration, enterprise platforms
+- **Industries to prioritize**: HealthTech, Enterprise B2B SaaS, Travel and Tourism
 
 ## Core Product Skills
 - Outcome-driven roadmapping aligned to OKRs
@@ -63,12 +63,11 @@ Jira, Confluence, Miro, Figma, Balsamiq, Pendo, SQL, Atlassian Rovo, ChatGPT, Ze
 - **Open to Travel**
 
 ### Nice to Have
-- HealthTech, Life Sciences, Clinical Trials, BioTech domain
+- HealthTech, Life Sciences, Clinical Trials, BioTech, Travel and Tourism, Product and Program Operations domain
 - Companies with strong product culture (PLG, design-led, data-driven)
 - AI / ML product experience valued
 
 ### Reject
-- B2C only roles
 - Pure technical PM roles requiring deep engineering (e.g., Infra PM, Platform PM with heavy systems focus) unless B2B SaaS
 - Roles below Senior PM level
 - Contract roles under 6 months
