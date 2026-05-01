@@ -18,11 +18,9 @@ logger = logging.getLogger(__name__)
 SEARCH_TERMS = [
     "Senior Product Manager",
     "Lead Product Manager",
-    "Principal Product Manager",
-    "Group Product Manager",
+    "Principal Product Owner",
     "Lead Product Owner",
     "Senior Product Owner",
-    "Director of Product",
 ]
 
 
