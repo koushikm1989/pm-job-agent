@@ -7,11 +7,10 @@
 - **LinkedIn**: https://www.linkedin.com/in/mukherjee-koushik/
 
 ## Target Roles (in priority order)
-1. Lead Product Owner / Lead Product Manager
+1. Lead Product Owner
 2. Senior Product Manager
-3. Principal Product Manager
-4. Group Product Manager
-5. Director of Product / Head of Product (stretch)
+3. Lead Product Manager
+4. Principal Product Manager (stretch)
 
 ## Domain Strengths
 - **Primary**: any Enterprise B2B SaaS
@@ -52,8 +51,8 @@ Jira, Confluence, Miro, Figma, Balsamiq, Pendo, SQL, Atlassian Rovo, ChatGPT, Ze
 ## Job Filtering Rules
 
 ### Must Have
-- Title contains: "Senior Product Manager", "Lead Product", "Principal Product", "Group Product Manager", "Director of Product", "Head of Product", "Lead Product Owner", "Senior Product Owner"
-- Domain: B2B SaaS preferred, HealthTech is strongest fit
+- Title contains: "Senior Product Manager", "Lead Product Owner", "Lead Product Manager", "Senior Product Owner"
+- Domain: B2B SaaS preferred and strongest fit,  HealthTech, Travel and Tourism
 - Compensation: ≥ INR 35 LPA (or international equivalent: ~USD 42K, EUR 39K, GBP 33K, AUD 65K, SGD 56K, JPY 6.3M, NZD 70K)
 
 ### Location Rules
