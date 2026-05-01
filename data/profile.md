@@ -30,7 +30,7 @@
 - Cross-functional leadership across globally distributed teams
 
 ## Tools Fluency
-Jira, Confluence, Miro, Figma, Balsamiq, Pendo, SQL, Atlassian Rovo, ChatGPT, Zephyr, TestRail, ALM
+Jira, Confluence, Miro, Figma, Balsamiq, Pendo, SQL, Atlassian Rovo, ChatGPT, Zephyr, TestRail, ALM, AI enabled PM
 
 ## Certifications
 - Product Management — INSEAD
@@ -57,9 +57,9 @@ Jira, Confluence, Miro, Figma, Balsamiq, Pendo, SQL, Atlassian Rovo, ChatGPT, Ze
 - Compensation: ≥ INR 35 LPA (or international equivalent: ~USD 42K, EUR 39K, GBP 33K, AUD 65K, SGD 56K, JPY 6.3M, NZD 70K)
 
 ### Location Rules
+- **Singapore**: Remote OR on-site both acceptable (first priority) 
 - **India, US, UK, Europe, Australia, Japan, New Zealand**: Remote only
-- **Singapore**: Remote OR on-site both acceptable
-- **Hard reject**: Roles requiring US work authorization, EU work authorization, or any "must be based in [country]" that excludes India residents
+- **Hard reject**: Roles requiring US work authorization, EU work authorization, or any "must be based in [country]" that excludes India residents, roles requiring Mandarin/Chinese/Japanese speaking fluency
 - **Open to Travel**
 
 ### Nice to Have
