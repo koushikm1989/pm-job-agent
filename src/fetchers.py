@@ -45,7 +45,7 @@ def fetch_jobspy_sources() -> List[Dict]:
                     results_wanted=15,
                     hours_old=168,  # past 7 days
                     country_indeed="India" if location == "India" else "Singapore",
-                    is_remote=True if location == "Remote" else None,
+                    is_remote=(location == "Remote"),
                 )
                 if df is None or df.empty:
                     continue
