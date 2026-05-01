@@ -11,12 +11,8 @@ logger = logging.getLogger(__name__)
 SENIORITY_KEYWORDS = [
     "senior product manager", "sr product manager", "sr. product manager",
     "lead product manager", "lead product owner",
-    "principal product manager", "principal product owner",
-    "group product manager",
+    "principal product owner",
     "senior product owner", "sr product owner",
-    "head of product", "director of product", "director, product",
-    "vp product", "vp of product", "vice president of product",
-    "staff product manager",
 ]
 
 # Titles to reject outright (junior/adjacent roles)
