@@ -12,7 +12,7 @@ SENIORITY_KEYWORDS = [
     "senior product manager", "sr product manager", "sr. product manager",
     "lead product manager", "lead product owner",
     "principal product owner",
-    "senior product owner", "sr product owner",
+    "senior product owner", "sr product owner", "product manager", "product owner"
 ]
 
 # Titles to reject outright (junior/adjacent roles)
