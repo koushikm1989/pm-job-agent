@@ -21,6 +21,8 @@ SEARCH_TERMS = [
     "Principal Product Owner",
     "Lead Product Owner",
     "Senior Product Owner",
+    "Product Manager",
+    "Product Owner"
 ]
 
 
