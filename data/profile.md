@@ -8,9 +8,12 @@
 
 ## Target Roles (in priority order)
 1. Lead Product Owner
-2. Senior Product Manager
-3. Lead Product Manager
-4. Principal Product Manager (stretch)
+2. Product Manager
+3. Senior Product Owner
+4. Product Owner
+5. Senior Product Manager
+6. Lead Product Manager
+7. Principal Product Manager (stretch)
 
 ## Domain Strengths
 - **Primary**: any Enterprise B2B SaaS
@@ -51,13 +54,13 @@ Jira, Confluence, Miro, Figma, Balsamiq, Pendo, SQL, Atlassian Rovo, ChatGPT, Ze
 ## Job Filtering Rules
 
 ### Must Have
-- Title contains: "Senior Product Manager", "Lead Product Owner", "Lead Product Manager", "Senior Product Owner"
-- Domain: B2B SaaS preferred and strongest fit,  HealthTech, Travel and Tourism
+- Title contains: "Senior Product Manager", "Lead Product Owner", "Lead Product Manager", "Senior Product Owner", "Product Manager", "Product Owner"
+- Domain: B2B SaaS preferred and strongest fit,  Operations, Program Management, Hospitality, HealthTech, Travel and Tourism
 - Compensation: ≥ INR 35 LPA (or international equivalent: ~USD 42K, EUR 39K, GBP 33K, AUD 65K, SGD 56K, JPY 6.3M, NZD 70K)
 
 ### Location Rules
 - **Singapore**: Remote OR on-site both acceptable (first priority) 
-- **India, US, UK, Europe, Australia, Japan, New Zealand**: Remote only
+- **India, US, UK, Europe, Australia, Japan, New Zealand**: Remote only next priority
 - **Hard reject**: Roles requiring US work authorization, EU work authorization, or any "must be based in [country]" that excludes India residents, roles requiring Mandarin/Chinese/Japanese speaking fluency
 - **Open to Travel**
 
