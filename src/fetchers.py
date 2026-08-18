@@ -16,25 +16,55 @@ logger = logging.getLogger(__name__)
 # }
 
 SEARCH_TERMS = [
-    "Senior Product Manager",
-    "Lead Product Manager",
-    "Principal Product Owner",
     "Lead Product Owner",
     "Senior Product Owner",
+    "AI Product Owner",
+    "Technical Product Owner",
+    "Product Owner",
     "Product Manager",
-    "Product Owner"
 ]
+
+# Broad net at fetch time. Strict matching happens in filters.py
+TITLE_KEYWORDS = ["product owner", "product manager"]
+
+
+def _country_for_indeed(location: str) -> str:
+    """Map our search location to the country JobSpy's Indeed scraper expects."""
+    mapping = {
+        "India": "India",
+        "Kolkata, India": "India",
+        "Singapore": "Singapore",
+        "United Kingdom": "UK",
+        "United States": "USA",
+        "Australia": "Australia",
+        "New Zealand": "New Zealand",
+        "Germany": "Germany",
+        "Netherlands": "Netherlands",
+        "Remote": "India",
+    }
+    return mapping.get(location, "India")
 
 
 def fetch_jobspy_sources() -> List[Dict]:
     """Pulls from LinkedIn, Indeed, Glassdoor, Naukri, ZipRecruiter, Google via JobSpy."""
     from jobspy import scrape_jobs
-    
+
     all_jobs = []
     sites = ["linkedin", "indeed", "glassdoor", "naukri", "zip_recruiter", "google"]
-    locations = ["India", "Singapore", "Remote", "United Kingdom", "Australia"]
-    
-    for term in SEARCH_TERMS[:3]:  # Top 3 terms to keep request volume reasonable
+    locations = [
+        "Remote",
+        "India",
+        "Kolkata, India",
+        "Singapore",
+        "United Kingdom",
+        "United States",
+        "Australia",
+        "New Zealand",
+        "Germany",
+        "Netherlands",
+    ]
+
+    for term in SEARCH_TERMS[:4]:  # Top 4 terms to keep request volume reasonable
         for location in locations:
             try:
                 logger.info(f"JobSpy: '{term}' in '{location}'")
@@ -44,7 +74,7 @@ def fetch_jobspy_sources() -> List[Dict]:
                     location=location,
                     results_wanted=15,
                     hours_old=168,  # past 7 days
-                    country_indeed="India" if location == "India" else "Singapore",
+                    country_indeed=_country_for_indeed(location),
                     is_remote=(location == "Remote"),
                 )
                 if df is None or df.empty:
@@ -82,7 +112,7 @@ def fetch_remoteok() -> List[Dict]:
             if not isinstance(item, dict) or "position" not in item:
                 continue
             title = item.get("position", "").lower()
-            if not any(t.lower() in title for t in ["product manager", "product owner", "head of product", "director of product"]):
+            if not any(t in title for t in TITLE_KEYWORDS):
                 continue
             jobs.append({
                 "source": "remoteok",
@@ -106,7 +136,7 @@ def fetch_weworkremotely() -> List[Dict]:
         feed = feedparser.parse("https://weworkremotely.com/categories/remote-product-jobs.rss")
         for entry in feed.entries:
             title = entry.get("title", "")
-            if not any(t.lower() in title.lower() for t in ["product manager", "product owner", "head of product"]):
+            if not any(t in title.lower() for t in TITLE_KEYWORDS):
                 continue
             company = title.split(":")[0] if ":" in title else ""
             role = title.split(":", 1)[1].strip() if ":" in title else title
@@ -126,7 +156,7 @@ def fetch_weworkremotely() -> List[Dict]:
 
 
 def fetch_recruithaus() -> List[Dict]:
-    """Recruit Haus Singapore. Best effort. Their featured jobs are rarely PM."""
+    """Recruit Haus Singapore. Best effort. Their featured jobs are rarely PO/PM."""
     jobs = []
     try:
         r = requests.get(
@@ -137,11 +167,11 @@ def fetch_recruithaus() -> List[Dict]:
         r.raise_for_status()
         soup = BeautifulSoup(r.text, "lxml")
         for card in soup.select("div.job-block, article.job-listing, h4.title a"):
-            title = card.get_text(strip=True) if card.name != "a" else card.get_text(strip=True)
+            title = card.get_text(strip=True)
             link = card.get("href") if card.name == "a" else (card.find("a")["href"] if card.find("a") else "")
             if not title or not link:
                 continue
-            if not any(t.lower() in title.lower() for t in ["product manager", "product owner"]):
+            if not any(t in title.lower() for t in TITLE_KEYWORDS):
                 continue
             jobs.append({
                 "source": "recruithaus",
@@ -159,10 +189,10 @@ def fetch_recruithaus() -> List[Dict]:
 
 
 def fetch_jobstreet_sg() -> List[Dict]:
-    """JobStreet Singapore. Best effort. Site structure can change."""
+    """JobStreet Singapore. Best effort. Site structure can change and may return 403."""
     jobs = []
     try:
-        url = "https://sg.jobstreet.com/product-manager-jobs"
+        url = "https://sg.jobstreet.com/product-owner-jobs"
         r = requests.get(
             url,
             headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"},
@@ -177,7 +207,7 @@ def fetch_jobstreet_sg() -> List[Dict]:
             if not title_tag:
                 continue
             title = title_tag.get_text(strip=True)
-            if not any(t.lower() in title.lower() for t in ["product manager", "product owner", "head of product"]):
+            if not any(t in title.lower() for t in TITLE_KEYWORDS):
                 continue
             link = title_tag.get("href", "")
             if link and not link.startswith("http"):
