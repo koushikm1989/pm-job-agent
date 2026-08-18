@@ -7,45 +7,97 @@ from typing import List, Dict, Set
 
 logger = logging.getLogger(__name__)
 
-# Titles we want
-SENIORITY_KEYWORDS = [
-    "senior product manager", "sr product manager", "sr. product manager",
-    "lead product manager", "lead product owner",
-    "principal product owner",
-    "senior product owner", "sr product owner", "product manager", "product owner"
+# --- Title matching -------------------------------------------------------
+
+# Product Owner variants we want. Matched as substrings.
+PO_KEYWORDS = [
+    "lead product owner",
+    "senior product owner",
+    "sr product owner",
+    "sr. product owner",
+    "ai product owner",
+    "technical product owner",
+    "product owner",
 ]
 
-# Titles to reject outright (junior/adjacent roles)
+# Product Manager: EXACT title only. No seniority prefixes or suffixes.
+PM_EXACT_TITLES = [
+    "product manager",
+]
+
+# Anything containing these is rejected outright, even if it also
+# contains a wanted keyword. Order matters: this runs first.
 REJECT_TITLE_KEYWORDS = [
-    "associate product manager", "apm", "junior product manager",
+    # PM seniority variants explicitly excluded by the candidate
+    "senior product manager", "sr product manager", "sr. product manager",
+    "lead product manager", "principal product manager", "staff product manager",
+    "group product manager", "product manager ii", "product manager iii",
+    "director of product", "director, product", "head of product",
+    "vp product", "vp of product", "vice president of product",
+    "chief product officer",
+    # Junior / adjacent roles
+    "associate product owner", "junior product owner", "assistant product owner",
+    "associate product manager", "junior product manager", "apm",
     "product marketing", "product analyst", "product designer",
-    "technical product manager intern", "intern", "graduate",
-    "product specialist", "product coordinator",
+    "product specialist", "product coordinator", "product support",
+    "intern", "internship", "graduate", "trainee", "fresher",
 ]
 
-# Geographies where we ONLY want remote roles
-REMOTE_ONLY_REGIONS = [
-    "india", "united states", "usa", "us-", "u.s.", "united kingdom", "uk",
-    "europe", "eu ", "germany", "france", "netherlands", "spain", "ireland",
-    "australia", "japan", "new zealand", "canada",
+# --- Location matching ----------------------------------------------------
+
+# Remote is acceptable from these regions
+REMOTE_OK_REGIONS = [
+    # India
+    "india", "bengaluru", "bangalore", "mumbai", "delhi", "hyderabad",
+    "pune", "chennai", "kolkata", "gurgaon", "gurugram", "noida",
+    # Singapore
+    "singapore",
+    # US
+    "united states", "usa", "u.s.", "us-", "new york", "california",
+    "san francisco", "seattle", "austin", "boston", "chicago", "denver",
+    # UK
+    "united kingdom", "uk", "london", "manchester", "edinburgh", "bristol",
+    # EU
+    "europe", "eu ", "germany", "berlin", "munich", "france", "paris",
+    "netherlands", "amsterdam", "spain", "madrid", "barcelona",
+    "ireland", "dublin", "poland", "warsaw", "portugal", "lisbon",
+    "sweden", "stockholm", "denmark", "copenhagen", "belgium", "brussels",
+    "italy", "milan", "austria", "vienna", "switzerland", "zurich",
+    "czech", "prague", "romania", "bucharest", "finland", "helsinki",
+    "norway", "oslo", "hungary", "budapest", "greece", "athens",
+    # Australia / NZ
+    "australia", "sydney", "melbourne", "brisbane", "perth",
+    "new zealand", "auckland", "wellington",
 ]
 
-# Singapore allows both remote and on-site
-SINGAPORE_KEYWORDS = ["singapore", "sg ", " sg,"]
+# On-site is ONLY acceptable in these places
+ONSITE_OK_LOCATIONS = [
+    "kolkata", "calcutta",
+    "singapore",
+]
 
-# Phrases that signal "must be physically in country X" → reject for remote-only regions
+# Phrases that mean "you must physically live here" for places
+# where the candidate cannot relocate
 LOCATION_LOCK_PHRASES = [
     "must be based in the us", "must be based in the united states",
-    "us citizens only", "us citizens and green card",
+    "us citizens only", "us citizens and green card", "green card holders only",
     "authorized to work in the us", "authorization to work in the united states",
     "must reside in the us", "must reside in the united states",
-    "us-based only", "usa-based only", "us residents only",
+    "us-based only", "usa-based only", "us residents only", "must be a us person",
+    "us work authorization required", "requires us work authorization",
     "must be located in the uk", "uk-based only", "must reside in the uk",
+    "right to work in the uk", "uk work authorization",
     "must be based in europe", "eu-based only", "eea only",
+    "must have eu work", "eu work permit required", "right to work in the eu",
     "must be based in australia", "australian citizens only",
-    "must be based in japan", "japanese nationals only",
-    "must be a us person", "us work authorization required",
+    "australian work rights", "must have australian work rights",
+    "must be based in new zealand", "nz work visa required",
+    "must be based in canada", "canadian work authorization",
+    "no visa sponsorship", "we do not sponsor", "cannot sponsor",
+    "sponsorship not available", "unable to sponsor",
 ]
+
+REMOTE_SIGNALS = ["remote", "work from home", "wfh", "distributed", "anywhere"]
 
 
 def _load_seen(seen_path: Path) -> Set[str]:
@@ -76,54 +128,94 @@ def _save_seen(seen_path: Path, seen: Set[str], new_urls: List[str]) -> None:
     seen_path.write_text(json.dumps(existing, indent=2))
 
 
-def _has_seniority_match(title: str) -> bool:
-    t = title.lower()
-    if any(reject in t for reject in REJECT_TITLE_KEYWORDS):
+def _normalize_title(title: str) -> str:
+    """Lowercase and collapse punctuation/whitespace for reliable matching."""
+    t = title.lower().strip()
+    t = re.sub(r"[^\w\s]", " ", t)   # strip punctuation
+    t = re.sub(r"\s+", " ", t)        # collapse whitespace
+    return t
+
+
+def _has_title_match(title: str) -> bool:
+    """
+    Strict title matching:
+      1. Reject if any blocked keyword appears
+      2. Accept if any Product Owner variant appears
+      3. Accept if the title is EXACTLY 'Product Manager' (with optional
+         leading/trailing noise like a department, but no seniority words)
+    """
+    t = _normalize_title(title)
+    if not t:
         return False
-    return any(kw in t for kw in SENIORITY_KEYWORDS)
+
+    # Step 1: hard rejects win
+    for blocked in REJECT_TITLE_KEYWORDS:
+        if _normalize_title(blocked) in t:
+            return False
+
+    # Step 2: Product Owner variants
+    for kw in PO_KEYWORDS:
+        if _normalize_title(kw) in t:
+            return True
+
+    # Step 3: bare Product Manager only
+    for kw in PM_EXACT_TITLES:
+        if _normalize_title(kw) in t:
+            return True
+
+    return False
 
 
-def _is_singapore(location: str) -> bool:
+def _is_onsite_ok(location: str) -> bool:
     loc = location.lower()
-    return any(kw in loc for kw in SINGAPORE_KEYWORDS)
+    return any(kw in loc for kw in ONSITE_OK_LOCATIONS)
 
 
-def _is_remote_only_region(location: str) -> bool:
+def _is_remote_ok_region(location: str) -> bool:
     loc = location.lower()
-    return any(kw in loc for kw in REMOTE_ONLY_REGIONS)
+    return any(kw in loc for kw in REMOTE_OK_REGIONS)
+
+
+def _looks_remote(job: Dict) -> bool:
+    if job.get("is_remote"):
+        return True
+    blob = (job.get("location", "") + " " + job.get("title", "")).lower()
+    return any(sig in blob for sig in REMOTE_SIGNALS)
 
 
 def _has_location_lock(description: str) -> bool:
-    """Check if the role explicitly excludes India residents."""
+    """Check if the role explicitly excludes India-based candidates."""
     desc = description.lower()
     return any(phrase in desc for phrase in LOCATION_LOCK_PHRASES)
 
 
 def _passes_location_rules(job: Dict) -> bool:
     """
-    Singapore: remote OR on-site → keep.
-    Other regions: only if remote AND not locked to local residents.
+    Accept if EITHER:
+      A) On-site in Kolkata or Singapore, OR
+      B) Remote, in an approved region, with no residency lock
     """
     location = job.get("location", "")
     description = job.get("description", "")
-    is_remote = job.get("is_remote", False)
-    
-    if _is_singapore(location):
+
+    # Path A: on-site in an acceptable city
+    if _is_onsite_ok(location):
         return True
-    
+
+    # Path B: remote roles
     if _has_location_lock(description):
         return False
-    
-    if _is_remote_only_region(location):
-        if not is_remote:
-            text_blob = (location + " " + description).lower()
-            if "remote" not in text_blob and "work from home" not in text_blob:
-                return False
+
+    if _looks_remote(job):
+        # Remote with no region info at all: let it through, Haiku will judge
+        if not location.strip():
+            return True
+        if _is_remote_ok_region(location):
+            return True
+        # Remote but region unclear: let it through for scoring
         return True
-    
-    if is_remote or "remote" in location.lower():
-        return True
-    
+
+    # Not remote, not Kolkata/Singapore
     return False
 
 
@@ -150,25 +242,25 @@ def _dedupe(jobs: List[Dict]) -> List[Dict]:
 def apply_filters(jobs: List[Dict], seen_path: Path) -> List[Dict]:
     """
     Pipeline:
-      1. Seniority match
+      1. Strict title match
       2. Location rules
       3. Dedupe within this run
       4. Drop anything we've already emailed about
     """
     seen = _load_seen(seen_path)
-    
-    after_seniority = [j for j in jobs if _has_seniority_match(j.get("title", ""))]
-    logger.info(f"After seniority filter: {len(after_seniority)}/{len(jobs)}")
-    
-    after_location = [j for j in after_seniority if _passes_location_rules(j)]
-    logger.info(f"After location filter: {len(after_location)}/{len(after_seniority)}")
-    
+
+    after_title = [j for j in jobs if _has_title_match(j.get("title", ""))]
+    logger.info(f"After title filter: {len(after_title)}/{len(jobs)}")
+
+    after_location = [j for j in after_title if _passes_location_rules(j)]
+    logger.info(f"After location filter: {len(after_location)}/{len(after_title)}")
+
     after_dedupe = _dedupe(after_location)
     logger.info(f"After dedupe: {len(after_dedupe)}/{len(after_location)}")
-    
+
     fresh = [j for j in after_dedupe if j.get("url", "").strip().lower() not in seen]
     logger.info(f"After seen filter: {len(fresh)}/{len(after_dedupe)}")
-    
+
     return fresh
 
 
