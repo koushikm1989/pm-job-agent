@@ -1,18 +1,24 @@
-name: Weekly PM Job Digest
+name: PM Job Digest
 
 on:
   schedule:
-    # Every Monday at 03:30 UTC = 09:00 IST
-    - cron: '30 3 * * 1'
+    # Monday at 04:30 UTC = 10:00 IST
+    - cron: '30 4 * * 1'
+    # Wednesday at 04:30 UTC = 10:00 IST
+    - cron: '30 4 * * 3'
   workflow_dispatch:  # lets you trigger manually from the Actions tab
 
 permissions:
   contents: write  # needed to commit seen_jobs.json back to the repo
 
+concurrency:
+  group: job-digest
+  cancel-in-progress: false
+
 jobs:
   run-digest:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     
     steps:
       - name: Checkout repo
@@ -41,6 +47,7 @@ jobs:
         run: |
           git config user.name "job-agent-bot"
           git config user.email "job-agent-bot@users.noreply.github.com"
+          git pull --rebase origin ${{ github.ref_name }} || true
           git add data/seen_jobs.json
           if git diff --staged --quiet; then
             echo "No changes to seen_jobs.json"
