@@ -4,7 +4,7 @@
 - **Current Role**: Lead Product Owner at Cytel Statistical Software (Mar 2024 – Present)
 - **Total Experience**: 13+ years
 - **Location**: Kolkata, India
-- **LinkedIn**: https://www.linkedin.com/in/koushikmukherjee
+- **LinkedIn**: https://www.linkedin.com/in/mukherjee-koushik/
 - **Portfolio**: https://agoodpm.netlify.app
 
 ## Positioning
